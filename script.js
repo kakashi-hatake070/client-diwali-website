@@ -77,11 +77,11 @@ function generateWish() {
 
 function shareOnWhatsApp() {
   const name = getUrlParameter("n") || "";
-  // prefer a canonical share URL from meta[property="og:url"] if available
-  const metaShare = document.querySelector('meta[property="og:url"]');
-  const base = metaShare && metaShare.getAttribute('content') ? metaShare.getAttribute('content') : (window.location.origin + window.location.pathname);
-  const sep = base.includes('?') ? '&' : '?';
-  const url = name ? `${base}${sep}n=${encodeURIComponent(name)}` : base;
+  const url =
+    window.location.origin +
+    window.location.pathname +
+    "?n=" +
+    encodeURIComponent(name);
   const senderPart = name ? `${name} ✨🎆 यांच्या कडून ` : '';
   const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
