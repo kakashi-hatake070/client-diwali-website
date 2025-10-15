@@ -64,25 +64,30 @@ function getUrlParameter(name) {
 function generateWish() {
   const name = document.getElementById("nameInput").value.trim();
   if (name) {
+    // Reload the page with the user's name AND an 'action' parameter
+    // This tells the page that this user is the one creating the wish
     const url =
       window.location.origin +
       window.location.pathname +
       "?n=" +
-      encodeURIComponent(name);
+      encodeURIComponent(name) +
+      "&action=share";
     window.location.href = url;
   } else {
+    // In a real app, you'd use a custom modal here instead of alert.
     alert("कृपया तुमचे नाव टाका");
   }
 }
 
 function shareOnWhatsApp() {
   const name = getUrlParameter("n") || "";
-  // always share the site's front page (index.html)
-  const url = window.location.href;
-  const senderPart = name ? `${name} ✨🎆 यांच्या कडून ` : '';
-  const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${url}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  // Manually build the URL to share, ensuring the '&action=share' part is REMOVED.
+  // This way, the receiver gets a clean link.
+  const urlToShare = window.location.origin + window.location.pathname + "?n=" + encodeURIComponent(name);
 
+  const senderPart = name ? `${name} ✨🎆 यांच्या कडून ` : '';
+  const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${urlToShare}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
 function createCrackers() {
@@ -121,14 +126,17 @@ function createFireworks() {
   }
 }
 
-// Initialize
+// Initialize on page load
 window.addEventListener("load", () => {
   const name = getUrlParameter("n");
+  const action = getUrlParameter("action");
+
   if (name) {
+    // If a name is in the URL, always show the personalized greeting
     document.getElementById("greeting").innerHTML = `
         <h1>${name} यांच्या कडून तुम्हाला व तुमच्या परिवाराला दिवाळीच्या हार्दिक शुभेच्छा!</h1>
         <div class="poem-container">
-          <img src="/images/diya.png" alt="Diya" class="poem-image">
+          <img src="/images/diya.png" alt="Diya" class="poem-image" onerror="this.style.display='none'">
           <div class="poem">
             ही दिवाळी तुम्हाला आणि तुमच्या<br>
             कुटुंबासाठी उज्वल जावो.<br>
@@ -136,10 +144,17 @@ window.addEventListener("load", () => {
             प्रत्येक गोष्टीत यश देवो.<br>
             💫दिवाळीच्या शुभेच्छा!💫
           </div>
-          <img src="/images/diya.png" alt="Diya" class="poem-image">
+          <img src="/images/diya.png" alt="Diya" class="poem-image" onerror="this.style.display='none'">
         </div>`;
-    document.getElementById("inputForm").style.display = "none";
-    document.getElementById("shareButtons").style.display = "flex";
+
+    // Check if this person is the SENDER (action=share)
+    if (action === 'share') {
+      // If it's the sender, hide the input form and show the share buttons
+      document.getElementById("inputForm").style.display = "none";
+      document.getElementById("shareButtons").style.display = "flex";
+    }
+    // If it's the RECEIVER (no action parameter), do nothing else.
+    // They will see the personalized greeting and the default input form.
   }
 
   // Create animations
@@ -147,7 +162,7 @@ window.addEventListener("load", () => {
   createFireworks();
 });
 
-// Allow Enter key to submit
+// Allow Enter key to submit the name
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("nameInput");
   if (input) {
@@ -160,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// Fireworks Animation
+// Fireworks Canvas Animation
 const canvas = document.getElementById('fireworks');
 const ctx = canvas.getContext('2d');
 let fireworks = [];
@@ -214,7 +229,12 @@ class Firework {
 }
 
 function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Use a semi-transparent clear to create a trail effect for the fireworks
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'lighter';
+
   fireworks.forEach(fw => {
     fw.update();
     fw.draw();
@@ -225,9 +245,10 @@ function loop() {
 
 setInterval(() => {
   const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height * 0.5; // upper half
+  const y = Math.random() * canvas.height * 0.5; // Launch from the upper half of the screen
   const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#f368e0'];
   fireworks.push(new Firework(x, y, colors));
 }, 800);
 
 loop();
+
