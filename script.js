@@ -1,67 +1,91 @@
-// ===============================
-// 🎧 Background Music Autoplay Handling
-// ===============================
+// Background music autoplay handling (resilient + continuous)
 const audio = document.getElementById('bgAudio') || document.querySelector("audio");
 if (audio) {
+  // prefer loop attribute but enforce via JS as well
   audio.loop = true;
   audio.preload = 'auto';
 
-  // Try autoplay immediately
+  // Try to start immediately and retry if blocked
   audio.play().then(() => {
     console.log("Background music started automatically");
   }).catch(() => {
-    console.log("Autoplay blocked, will retry on user interaction");
+    console.log("Autoplay blocked, will retry on user interaction and visibility changes");
   });
 
-  const resumePlayback = () => audio.play().catch(() => {});
-  ['click', 'touchstart', 'keydown', 'focus'].forEach(evt => {
-    window.addEventListener(evt, resumePlayback, { passive: true });
-  });
+  // On first user gesture, try to play
+  const tryPlayOnGesture = async () => {
+    try {
+      await audio.play();
+      console.log('Playback started after user gesture');
+    } catch (e) {
+      console.warn('Unable to play after gesture', e);
+    }
+    window.removeEventListener('click', tryPlayOnGesture);
+    window.removeEventListener('touchstart', tryPlayOnGesture);
+    window.removeEventListener('keydown', tryPlayOnGesture);
+  };
+  window.addEventListener('click', tryPlayOnGesture, { passive: true });
+  window.addEventListener('touchstart', tryPlayOnGesture, { passive: true });
+  window.addEventListener('keydown', tryPlayOnGesture, { passive: true });
 
-  // Resume on visibility change
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) audio.play().catch(() => {});
-  });
-
-  // Safety: restart on end
+  // If audio ever ends (safety) restart it
   audio.addEventListener('ended', () => {
+    try { audio.play(); } catch (e) { /* ignore */ }
+  });
+
+  // When the document becomes visible again, try to resume audio
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      audio.play().catch(() => {});
+    }
+  });
+
+  // Also try on focus (some browsers) and user interactions (mobile)
+  window.addEventListener('focus', () => {
     audio.play().catch(() => {});
   });
+
+  // Touch / click to resume (one-time attempt)
+  const resumeAudio = () => {
+    audio.play().catch(() => {});
+  };
+  // keep trying on user gestures but do not remove the control
+  window.addEventListener('click', resumeAudio, { passive: true });
+  window.addEventListener('touchstart', resumeAudio, { passive: true });
 }
 
-// ===============================
-// 🧰 Utility Functions
-// ===============================
+// Utility functions
 function getUrlParameter(name) {
-  const params = new URLSearchParams(window.location.search);
-  return params.get(name) || "";
+  const regex = new RegExp("[?&]" + name + "=([^&#]*)");
+  const results = regex.exec(window.location.search);
+  return results ? decodeURIComponent(results[1].replace(/\+/g, " ")) : "";
 }
 
 function generateWish() {
   const name = document.getElementById("nameInput").value.trim();
   if (name) {
-    const url = window.location.origin + window.location.pathname + "?n=" + encodeURIComponent(name);
+    const url =
+      window.location.origin +
+      window.location.pathname +
+      "?n=" +
+      encodeURIComponent(name);
     window.location.href = url;
   } else {
+    // In a real app, you'd use a custom modal here instead of alert.
     alert("कृपया तुमचे नाव टाका");
   }
 }
 
-// ===============================
-// 📲 WhatsApp Share
-// ===============================
 function shareOnWhatsApp() {
   const name = getUrlParameter("n") || "";
-  const baseUrl = window.location.origin + window.location.pathname;
-  const shareUrl = name ? `${baseUrl}?n=${encodeURIComponent(name)}` : baseUrl;
+  // *** THIS IS THE UPDATED LINE ***
+  // It now shares the full current URL, including the sender's name parameter.
+  const url = window.location.href;
   const senderPart = name ? `${name} ✨🎆 यांच्या कडून ` : '';
-  const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${shareUrl}`;
+  const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
-// ===============================
-// 🎆 Crackers & Fireworks DOM Effects
-// ===============================
 function createCrackers() {
   for (let i = 0; i < 10; i++) {
     const cracker = document.createElement("div");
@@ -71,16 +95,13 @@ function createCrackers() {
     cracker.style.animationDelay = Math.random() * 5 + "s";
     document.body.appendChild(cracker);
 
-    // Add particles
+    // Create particles for burst effect
     for (let j = 0; j < 8; j++) {
       const particle = document.createElement("div");
       particle.className = "particle";
       particle.style.setProperty('--angle', (j * 45) + 'deg');
       cracker.appendChild(particle);
     }
-
-    // Optional: cleanup after animation
-    setTimeout(() => cracker.remove(), 12000);
   }
 }
 
@@ -98,15 +119,49 @@ function createFireworks() {
     ][Math.floor(Math.random() * 4)];
     firework.style.animationDelay = Math.random() * 2 + "s";
     document.body.appendChild(firework);
-
-    // cleanup
-    setTimeout(() => firework.remove(), 8000);
   }
 }
 
-// ===============================
-// 💥 Canvas Fireworks Animation
-// ===============================
+// Initialize on page load
+window.addEventListener("load", () => {
+  const name = getUrlParameter("n");
+  if (name) {
+    document.getElementById("greeting").innerHTML = `
+        <h1>${name} यांच्या कडून तुम्हाला व तुमच्या परिवाराला दिवाळीच्या हार्दिक शुभेच्छा!</h1>
+        <div class="poem-container">
+          <img src="/images/diya.png" alt="Diya" class="poem-image" onerror="this.style.display='none'">
+          <div class="poem">
+            ही दिवाळी तुम्हाला आणि तुमच्या<br>
+            कुटुंबासाठी उज्वल जावो.<br>
+            या दिवाळीत देव तुम्हाला<br>
+            प्रत्येक गोष्टीत यश देवो.<br>
+            💫दिवाळीच्या शुभेच्छा!💫
+          </div>
+          <img src="/images/diya.png" alt="Diya" class="poem-image" onerror="this.style.display='none'">
+        </div>`;
+    document.getElementById("inputForm").style.display = "none";
+    document.getElementById("shareButtons").style.display = "flex";
+  }
+
+  // Create animations
+  createCrackers();
+  createFireworks();
+});
+
+// Allow Enter key to submit the name
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("nameInput");
+  if (input) {
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        generateWish();
+      }
+    });
+  }
+});
+
+
+// Fireworks Canvas Animation
 const canvas = document.getElementById('fireworks');
 const ctx = canvas.getContext('2d');
 let fireworks = [];
@@ -160,9 +215,11 @@ class Firework {
 }
 
 function loop() {
-  // Slight fade to create trail effect
-  ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+  // Use a semi-transparent clear to create a trail effect for the fireworks
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'lighter';
 
   fireworks.forEach(fw => {
     fw.update();
@@ -174,46 +231,9 @@ function loop() {
 
 setInterval(() => {
   const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height * 0.5;
+  const y = Math.random() * canvas.height * 0.5; // Launch from the upper half of the screen
   const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#f368e0'];
   fireworks.push(new Firework(x, y, colors));
 }, 800);
 
 loop();
-
-// ===============================
-// 🚀 Init on Page Load
-// ===============================
-document.addEventListener("DOMContentLoaded", () => {
-  const name = getUrlParameter("n");
-  if (name) {
-    document.getElementById("greeting").innerHTML = `
-      <h1>${name} यांच्या कडून तुम्हाला व तुमच्या परिवाराला दिवाळीच्या हार्दिक शुभेच्छा!</h1>
-      <div class="poem-container">
-        <img src="/images/diya.png" alt="Diya" class="poem-image">
-        <div class="poem">
-          ही दिवाळी तुम्हाला आणि तुमच्या<br>
-          कुटुंबासाठी उज्वल जावो.<br>
-          या दिवाळीत देव तुम्हाला<br>
-          प्रत्येक गोष्टीत यश देवो.<br>
-          💫दिवाळीच्या शुभेच्छा!💫
-        </div>
-        <img src="/images/diya.png" alt="Diya" class="poem-image">
-      </div>`;
-    document.getElementById("inputForm").style.display = "none";
-    document.getElementById("shareButtons").style.display = "flex";
-  }
-
-  createCrackers();
-  createFireworks();
-
-  // Allow Enter key to submit name
-  const input = document.getElementById("nameInput");
-  if (input) {
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        generateWish();
-      }
-    });
-  }
-});
