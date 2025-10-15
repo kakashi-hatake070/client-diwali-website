@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="mr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>दिवाळीच्या शुभेच्छा</title>
+
+    <meta name="description" content="वैयक्तिक दिवाळी शुभेच्छा पाठवा आणि WhatsApp वर शेअर करा!" />
+    <meta property="og:title" content="दिवाळीच्या शुभेच्छा" />
+    <meta property="og:description" content="वैयक्तिक दिवाळी शुभेच्छा पाठवा आणि WhatsApp वर शेअर करा!" />
+    <meta property="og:image" content="https://sharehit.in/diwali-og-image.jpg" />
+    <meta property="og:url" content="https://sharehit.in/diwali" />
+    <meta property="og:type" content="website" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- 🔥 Fireworks Background -->
+    <canvas id="fireworks"></canvas>
+
+    <!-- 🌸 Decorative Corners -->
+    <img class="corner top-left" src="/images/corner.png" alt="Corner" />
+    <img class="corner top-right" src="/images/corner.png" alt="Corner" />
+    <img class="corner1 bottom-left" src="/images/diya.png" alt="Diya" />
+    <img class="corner1 bottom-right" src="/images/diya.png" alt="Diya" />
+
+    <!-- 🌟 Greeting Section -->
+    <div class="section" id="greetingSection">
+      <div id="greeting">
+        <h1>
+          तुम्हाला व तुमच्या परिवाराला दिवाळीच्या हार्दिक शुभेच्छा!
+        </h1>
+
+        <div class="poem-container">
+          <img src="/images/diya.png" alt="Diya" class="poem-image" />
+          <div class="poem">
+            ही दिवाळी तुम्हाला आणि तुमच्या<br />
+            कुटुंबासाठी उज्वल जावो.<br />
+            या दिवाळीत देव तुम्हाला<br />
+            प्रत्येक गोष्टीत यश देवो.<br />
+            💫दिवाळीच्या शुभेच्छा!💫
+          </div>
+          <img src="/images/diya.png" alt="Diya" class="poem-image" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 💌 Input Section -->
+    <div class="section" id="inputSection">
+      <div class="input-container" id="inputForm">
+        <input type="text" id="nameInput" placeholder="तुमचे नाव" />
+        <!-- <span>👉 सेंड करा.</span> -->
+        <button onclick="generateWish()">सेंड करा</button>
+      </div>
+
+      <div class="share-buttons" id="shareButtons" style="display: none">
+        <a href="#" class="share-btn" id="shareBtn" onclick="shareOnWhatsApp(); return false;">WhatsApp वर शेअर करा</a>
+        <a href="https://chat.whatsapp.com/yourgroup" class="share-btn join-btn" target="_blank">WhatsApp ग्रुपमध्ये सामील व्हा</a>
+      </div>
+    </div>
+
+    <!-- 👣 Footer -->
+    <footer>
+      © crewtechventure • <a href="#" onclick="return false;">Follow Us</a>
+    </footer>
+
+    <!-- 🎵 Background Music -->
+    <audio id="bgAudio" autoplay loop playsinline>
+      <source src="diwali.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <script src="script.js"></script>
+  </body>
+</html>
