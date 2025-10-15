@@ -77,14 +77,12 @@ function generateWish() {
 
 function shareOnWhatsApp() {
   const name = getUrlParameter("n") || "";
-  const url =
-    window.location.origin +
-    window.location.pathname +
-    "?n=" +
-    encodeURIComponent(name);
+  // always share the site's front page (index.html)
+  const url = window.location.origin + '/index.html';
   const senderPart = name ? `${name} ✨🎆 यांच्या कडून ` : '';
   const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+
 }
 
 function createCrackers() {
