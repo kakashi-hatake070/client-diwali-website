@@ -71,19 +71,18 @@ function generateWish() {
       encodeURIComponent(name);
     window.location.href = url;
   } else {
-    // In a real app, you'd use a custom modal here instead of alert.
     alert("कृपया तुमचे नाव टाका");
   }
 }
 
 function shareOnWhatsApp() {
   const name = getUrlParameter("n") || "";
-  // *** THIS IS THE UPDATED LINE ***
-  // It now shares the full current URL, including the sender's name parameter.
+  // always share the site's front page (index.html)
   const url = window.location.href;
   const senderPart = name ? `${name} ✨🎆 यांच्या कडून ` : '';
   const msg = `${senderPart}तुम्हाला दिवाळीच्या शुभेच्छा एका नव्या अंदाजामध्ये ✨🎇\n\nबघा 👉 ${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+
 }
 
 function createCrackers() {
@@ -122,14 +121,14 @@ function createFireworks() {
   }
 }
 
-// Initialize on page load
+// Initialize
 window.addEventListener("load", () => {
   const name = getUrlParameter("n");
   if (name) {
     document.getElementById("greeting").innerHTML = `
         <h1>${name} यांच्या कडून तुम्हाला व तुमच्या परिवाराला दिवाळीच्या हार्दिक शुभेच्छा!</h1>
         <div class="poem-container">
-          <img src="/images/diya.png" alt="Diya" class="poem-image" onerror="this.style.display='none'">
+          <img src="/images/diya.png" alt="Diya" class="poem-image">
           <div class="poem">
             ही दिवाळी तुम्हाला आणि तुमच्या<br>
             कुटुंबासाठी उज्वल जावो.<br>
@@ -137,7 +136,7 @@ window.addEventListener("load", () => {
             प्रत्येक गोष्टीत यश देवो.<br>
             💫दिवाळीच्या शुभेच्छा!💫
           </div>
-          <img src="/images/diya.png" alt="Diya" class="poem-image" onerror="this.style.display='none'">
+          <img src="/images/diya.png" alt="Diya" class="poem-image">
         </div>`;
     document.getElementById("inputForm").style.display = "none";
     document.getElementById("shareButtons").style.display = "flex";
@@ -148,7 +147,7 @@ window.addEventListener("load", () => {
   createFireworks();
 });
 
-// Allow Enter key to submit the name
+// Allow Enter key to submit
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("nameInput");
   if (input) {
@@ -161,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// Fireworks Canvas Animation
+// Fireworks Animation
 const canvas = document.getElementById('fireworks');
 const ctx = canvas.getContext('2d');
 let fireworks = [];
@@ -215,12 +214,7 @@ class Firework {
 }
 
 function loop() {
-  // Use a semi-transparent clear to create a trail effect for the fireworks
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalCompositeOperation = 'lighter';
-
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   fireworks.forEach(fw => {
     fw.update();
     fw.draw();
@@ -231,7 +225,7 @@ function loop() {
 
 setInterval(() => {
   const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height * 0.5; // Launch from the upper half of the screen
+  const y = Math.random() * canvas.height * 0.5; // upper half
   const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#f368e0'];
   fireworks.push(new Firework(x, y, colors));
 }, 800);
