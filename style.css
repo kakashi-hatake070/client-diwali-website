@@ -126,7 +126,7 @@ span {
 }
 
 input[type="text"] {
-  padding: 17px 200px;
+  padding: 10px 12px;
   font-size: 1.1em;
   border: 2px solid #ffeb99;
   border-radius: 8px;
@@ -141,7 +141,7 @@ input[type="text"] {
 input::placeholder { color: #ffcc88; }
 
 button {
-  padding: 5px 235px;
+  padding: 10px 20px;
   font-size: 1.1em;
   background: linear-gradient(45deg, #ffb347, #ff9c00);
   border: none;
@@ -297,6 +297,22 @@ footer a:hover {
   .corner, .corner1 { width: 60px; height: 60px; }
   .section { padding: 30px 10px; }
   input, button { font-size: 1em; }
+}
+
+/* Mute/unmute button */
+.mute-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1010;
+  padding: 8px 14px;
+  font-size: 1.2em;
+  border-radius: 50px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ffeb99;
+  cursor: pointer;
+  min-width: unset;
+  margin: 0;
 }
 
 /* Position canvas behind content */

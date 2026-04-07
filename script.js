@@ -54,6 +54,23 @@ if (audio) {
   window.addEventListener('touchstart', resumeAudio, { passive: true });
 }
 
+// Toggle mute/unmute for background music
+function toggleMute() {
+  const btn = document.getElementById('muteBtn');
+  if (!audio) {
+    console.warn('Audio element not available');
+    if (btn) btn.disabled = true;
+    return;
+  }
+  if (audio.muted) {
+    audio.muted = false;
+    if (btn) btn.textContent = '🔊';
+  } else {
+    audio.muted = true;
+    if (btn) btn.textContent = '🔇';
+  }
+}
+
 // Utility functions
 function getUrlParameter(name) {
   const regex = new RegExp("[?&]" + name + "=([^&#]*)");
